@@ -86,14 +86,33 @@
       if (selectedGuild) await loadChannels();
     });
 
+    const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+    async function waitForAction(actionId) {
+      for (let attempt = 0; attempt < 35; attempt += 1) {
+        const { data: action, error } = await client
+          .from("dashboard_actions")
+          .select("status, result")
+          .eq("id", actionId)
+          .single();
+        if (error) throw error;
+        if (action.status === "done") return action.result || "The bot applied the change.";
+        if (action.status === "failed") throw new Error(action.result || "The bot rejected the change.");
+        await delay(1000);
+      }
+      throw new Error("The bot did not respond in time. Please try again.");
+    }
+
     async function queue(action, payload) {
       if (!selectedGuild) throw new Error("Choose a Discord server first.");
-      const { error } = await client.from("dashboard_actions").insert({
-        guild_id: selectedGuild.id,
-        action_type: action,
-        payload
-      });
+      const { data: queued, error } = await client
+        .from("dashboard_actions")
+        .insert({ guild_id: selectedGuild.id, action_type: action, payload })
+        .select("id")
+        .single();
       if (error) throw error;
+      notice("Waiting for the bot…");
+      return waitForAction(queued.id);
     }
 
     byId("save").addEventListener("click", async () => {
@@ -105,20 +124,20 @@
         if (!Number.isInteger(spawnMinutes) || spawnMinutes < 2 || spawnMinutes > 720) {
           throw new Error("Enter a spawn interval from 2 minutes to 12 hours.");
         }
-        await queue("save_settings", {
+        const result = await queue("save_settings", {
           channel_id: channelSelect.value,
           spawn_minutes: spawnMinutes,
           auto_secrets: byId("auto-secrets").checked,
           moderation_enabled: byId("moderation-tools").checked
         });
-        notice("Settings sent to the bot. It will apply them shortly.");
+        notice(result);
       } catch (error) { notice(error.message || "Could not save settings.", false); }
     });
 
     byId("start-double").addEventListener("click", async () => {
       try {
-        await queue("double_points", { rounds: Number(byId("double-rounds").value) });
-        notice("Double points has been sent to the bot.");
+        const result = await queue("double_points", { rounds: Number(byId("double-rounds").value) });
+        notice(result);
       } catch (error) { notice(error.message || "Could not start the event.", false); }
     });
 
@@ -126,9 +145,9 @@
       try {
         const message = byId("announcement").value.trim();
         if (!message) throw new Error("Write an announcement first.");
-        await queue("announcement", { message });
+        const result = await queue("announcement", { message });
         byId("announcement").value = "";
-        notice("Announcement sent to the bot.");
+        notice(result);
       } catch (error) { notice(error.message || "Could not send the announcement.", false); }
     });
   })();
