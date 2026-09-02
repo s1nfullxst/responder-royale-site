@@ -79,7 +79,10 @@
       button.textContent = "Opening Discord…";
       const { error } = await client.auth.signInWithOAuth({
         provider: "discord",
-        options: { redirectTo: `${window.location.origin}${window.location.pathname}` }
+        options: {
+          redirectTo: `${window.location.origin}${window.location.pathname}`,
+          scopes: "identify guilds"
+        }
       });
       if (error) {
         button.disabled = false;
