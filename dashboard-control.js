@@ -49,7 +49,10 @@
         headers: { Authorization: `Bearer ${session.provider_token}` }
       });
       if (!response.ok) throw new Error("Discord did not return your servers.");
-      guilds = (await response.json()).filter((guild) => guild.owner || (BigInt(guild.permissions || "0") & 0x20n));
+      // The bot verifies ownership again before applying any request. Keep the
+      // server list consistent so a Discord administrator is never shown
+      // controls that the bot must reject.
+      guilds = (await response.json()).filter((guild) => guild.owner);
     } catch (error) {
       byId("server-help").textContent = "Please sign out and sign in again to allow server access.";
       return;
@@ -58,7 +61,7 @@
     serverSelect.replaceChildren(new Option("Choose your Discord server", ""));
     guilds.forEach((guild) => serverSelect.add(new Option(guild.name, guild.id)));
     serverSelect.disabled = false;
-    byId("server-help").textContent = guilds.length ? "Choose the server you want to manage." : "No servers you own were found.";
+    byId("server-help").textContent = guilds.length ? "Choose a server you own." : "No Discord servers owned by this account were found.";
 
     async function loadChannels() {
       channelSelect.replaceChildren(new Option("Loading channels…", ""));
