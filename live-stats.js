@@ -1,6 +1,7 @@
 (() => {
   const config = window.RESPONDER_ROYALE_SUPABASE;
   if (!config || config.anonKey.startsWith("PASTE_")) return;
+  const previewOffline = new URLSearchParams(window.location.search).get("preview") === "offline";
 
   const cardValue = (label) => {
     const heading = [...document.querySelectorAll(".card small")]
@@ -20,7 +21,9 @@
     title.textContent = online ? "Responder Royale is operational" : "The Discord bot is currently down";
     copy.textContent = online
       ? "No service interruptions are currently reported."
-      : "Commands and vehicle rounds may be unavailable while the team investigates.";
+      : previewOffline
+        ? "Preview only — this is how the page looks during a bot outage."
+        : "Commands and vehicle rounds may be unavailable while the team investigates.";
     badge.textContent = online ? "All systems operational" : "Service interruption";
     service.textContent = online ? "Operational" : "Down";
     connection.textContent = online ? "● Online" : "● Offline";
@@ -34,7 +37,7 @@
       if (!response.ok) throw new Error("Stats unavailable");
       const [stats] = await response.json();
       if (!stats) throw new Error("No stats yet");
-      showBotState(Boolean(stats.bot_online));
+      showBotState(previewOffline ? false : Boolean(stats.bot_online));
       cardValue("ACTIVE SERVERS").textContent = `${stats.active_servers} Discord server${stats.active_servers === 1 ? "" : "s"}`;
       cardValue("LAST WEBSITE UPDATE").textContent = new Date(stats.updated_at).toLocaleString();
     } catch {
