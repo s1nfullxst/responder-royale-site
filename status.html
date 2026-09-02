@@ -6,6 +6,7 @@
   <title>Responder Royale — Status</title>
   <style>
     :root{--bg:#171d25;--panel:#1e2630;--deep:#11171d;--line:#364452;--text:#f2f5f7;--muted:#a0afb9;--blue:#77b7df;--orange:#ee714e;--good:#5fd7a1}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}a{color:inherit;text-decoration:none}.container{max-width:1180px;margin:auto;padding:0 28px}.header{height:74px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.logo{font-size:13px;font-weight:800}.logo b{color:var(--orange)}nav{display:flex;gap:25px;color:#bcc7ce;font-size:13px}nav a:hover,nav a.active{color:var(--text)}.join{background:var(--orange);color:#22282f;padding:11px 15px;border-radius:5px;font-size:13px;font-weight:bold}.hero{padding:84px 0 42px;max-width:720px}.tag{margin:0 0 14px;color:var(--blue);font-size:10px;font-weight:bold;letter-spacing:1.4px}.hero h1{font-size:clamp(44px,6vw,64px);letter-spacing:-3px;line-height:1.02;margin:0 0 20px}.hero p{max-width:590px;margin:0;color:var(--muted);font-size:15px;line-height:1.65}.overview{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:26px;background:var(--panel);border:1px solid var(--line);border-radius:8px}.overview h2{margin:0 0 8px;font-size:24px}.overview p{margin:0;color:var(--muted);font-size:13px}.operational{display:inline-flex;align-items:center;gap:9px;white-space:nowrap;padding:10px 14px;border-radius:99px;background:#17362d;color:var(--good);font-size:12px;font-weight:bold}.operational:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(95,215,161,.12)}.status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}.card{min-height:140px;padding:23px;background:var(--panel);border:1px solid var(--line);border-radius:8px}.card small{display:block;color:var(--blue);font-size:10px;font-weight:bold;letter-spacing:1.1px}.card b{display:block;margin:18px 0 7px;font-size:18px}.card span{color:var(--muted);font-size:12px;line-height:1.5}.services{margin-top:68px;padding-top:54px;border-top:1px solid var(--line)}.services h2{margin:0 0 8px;font-size:34px;letter-spacing:-1px}.services>p{margin:0 0 24px;color:var(--muted);font-size:14px}.service-list{overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:8px}.service{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:19px 22px}.service+.service{border-top:1px solid var(--line)}.service h3{margin:0 0 5px;font-size:14px}.service p{margin:0;color:var(--muted);font-size:12px}.service strong{display:flex;align-items:center;gap:8px;color:var(--good);font-size:11px;text-transform:uppercase;letter-spacing:.7px}.service strong:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good)}@media(max-width:760px){.container{padding:0 20px}.header nav{display:none}.hero{padding-top:62px}.overview{align-items:flex-start;flex-direction:column}.status-grid{grid-template-columns:1fr}.services{margin-top:54px;padding-top:44px}.service{align-items:flex-start}.join{padding:10px 12px}}
+    .overview.is-down{border-color:rgba(255,107,107,.55);background:#2b2025}.operational.is-down{background:#422329;color:#ff9a9a}.operational.is-down:before{background:#ff6b6b;box-shadow:0 0 0 4px rgba(255,107,107,.13)}.card b.is-down,.service strong.is-down{color:#ff9a9a}.service strong.is-down:before{background:#ff6b6b}
   </style>
   <link rel="stylesheet" href="footer.css">
 </head>
@@ -14,14 +15,14 @@
     <header class="header"><a class="logo" href="index.html">RESPONDER <b>ROYALE</b></a><nav><a href="manage.html">Dashboard</a><a href="commands.html">Commands</a><a class="active" href="status.html">Status</a><a href="staff.html">Staff</a><a href="https://discord.gg/9YtqGqTPUj">Help</a></nav><a class="join" href="https://discord.gg/9YtqGqTPUj">Join Discord</a></header>
     <main>
       <section class="hero"><p class="tag">LIVE SERVICE STATUS</p><h1>Everything at a glance.</h1><p>See whether the bot and its public services are online. This page refreshes its live data automatically every minute.</p></section>
-      <section class="overview" aria-label="Overall service status"><div><h2>Responder Royale is operational</h2><p>No service interruptions are currently reported.</p></div><div class="operational">All systems operational</div></section>
+      <section class="overview" id="overall-status" aria-label="Overall service status"><div><h2 id="overall-title">Responder Royale is operational</h2><p id="overall-copy">No service interruptions are currently reported.</p></div><div class="operational" id="overall-badge">All systems operational</div></section>
       <section class="status-grid" aria-label="Live bot information">
         <article class="card"><small>BOT CONNECTION</small><b>Checking status…</b><span>Live Discord connection</span></article>
         <article class="card"><small>ACTIVE SERVERS</small><b>Loading…</b><span>Discord communities using the bot</span></article>
         <article class="card"><small>LAST WEBSITE UPDATE</small><b>Loading…</b><span>Latest successful bot sync</span></article>
       </section>
       <section class="services"><h2>Services</h2><p>The systems that keep Responder Royale running.</p><div class="service-list">
-        <article class="service"><div><h3>Discord bot</h3><p>Vehicle rounds, commands, events, and moderation.</p></div><strong>Operational</strong></article>
+        <article class="service"><div><h3>Discord bot</h3><p>Vehicle rounds, commands, events, and moderation.</p></div><strong id="bot-service-status">Operational</strong></article>
         <article class="service"><div><h3>Server dashboard</h3><p>Per-server channels, spawn rates, and event controls.</p></div><strong>Operational</strong></article>
         <article class="service"><div><h3>Public website</h3><p>Commands, status information, support, and legal pages.</p></div><strong>Operational</strong></article>
       </div></section>
@@ -36,6 +37,6 @@
     <div class="rr-footer__bottom">© 2026 Responder Royale. All rights reserved.</div>
   </footer>
   <script src="site-config.js"></script>
-  <script src="live-stats.js"></script>
+  <script src="live-stats.js?v=2"></script>
 </body>
 </html>
