@@ -23,7 +23,14 @@
     const client = await waitForSupabase();
     const serverSelect = byId("server-select");
     const channelSelect = byId("game-channel");
+    const spawnInterval = byId("spawn-interval");
+    const customSpawnMinutes = byId("custom-spawn-minutes");
     let selectedGuild = null;
+
+    spawnInterval.addEventListener("change", () => {
+      customSpawnMinutes.hidden = spawnInterval.value !== "custom";
+      if (!customSpawnMinutes.hidden) customSpawnMinutes.focus();
+    });
 
     const sessionResult = await client.auth.getSession();
     let session = sessionResult.data.session;
@@ -89,9 +96,15 @@
     byId("save").addEventListener("click", async () => {
       try {
         if (!channelSelect.value) throw new Error("Choose the game channel first.");
+        const spawnMinutes = spawnInterval.value === "custom"
+          ? Number(customSpawnMinutes.value)
+          : Number(spawnInterval.value);
+        if (!Number.isInteger(spawnMinutes) || spawnMinutes < 2 || spawnMinutes > 720) {
+          throw new Error("Enter a spawn interval from 2 minutes to 12 hours.");
+        }
         await queue("save_settings", {
           channel_id: channelSelect.value,
-          spawn_minutes: Number(byId("spawn-interval").value),
+          spawn_minutes: spawnMinutes,
           auto_secrets: byId("auto-secrets").checked,
           moderation_enabled: byId("moderation-tools").checked
         });
