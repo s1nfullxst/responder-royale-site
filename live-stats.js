@@ -2,38 +2,43 @@
   const config = window.RESPONDER_ROYALE_SUPABASE;
   if (!config || config.anonKey.startsWith("PASTE_")) return;
 
-  const updateCard = (label, value) => {
-    const labelNode = [...document.querySelectorAll(".card p")]
+  const cardValue = (label) => {
+    const heading = [...document.querySelectorAll(".card small")]
       .find((node) => node.textContent.trim() === label);
-    const valueNode = labelNode?.parentElement?.querySelector("b");
-    if (valueNode) valueNode.textContent = value;
+    return heading?.parentElement?.querySelector("b");
   };
 
-  const updateStatusCard = (label, value) => {
-    const labelNode = [...document.querySelectorAll(".card small")]
-      .find((node) => node.textContent.trim() === label);
-    const valueNode = labelNode?.parentElement?.querySelector("b");
-    if (valueNode) valueNode.textContent = value;
+  const showBotState = (online) => {
+    const overview = document.getElementById("overall-status");
+    const title = document.getElementById("overall-title");
+    const copy = document.getElementById("overall-copy");
+    const badge = document.getElementById("overall-badge");
+    const service = document.getElementById("bot-service-status");
+    const connection = cardValue("BOT CONNECTION");
+    [overview, badge, service, connection].forEach((element) => element?.classList.toggle("is-down", !online));
+
+    title.textContent = online ? "Responder Royale is operational" : "The Discord bot is currently down";
+    copy.textContent = online
+      ? "No service interruptions are currently reported."
+      : "Commands and vehicle rounds may be unavailable while the team investigates.";
+    badge.textContent = online ? "All systems operational" : "Service interruption";
+    service.textContent = online ? "Operational" : "Down";
+    connection.textContent = online ? "● Online" : "● Offline";
   };
 
   async function loadStats() {
     try {
-      const response = await fetch(
-        `${config.url}/rest/v1/dashboard_stats?id=eq.1&select=*`,
-        { headers: { apikey: config.anonKey } },
-      );
+      const response = await fetch(`${config.url}/rest/v1/dashboard_stats?id=eq.1&select=*`, {
+        headers: { apikey: config.anonKey },
+      });
       if (!response.ok) throw new Error("Stats unavailable");
       const [stats] = await response.json();
       if (!stats) throw new Error("No stats yet");
-
-      updateCard("ACTIVE SERVERS", stats.active_servers);
-      updateCard("REGISTERED PLAYERS", stats.registered_players);
-      updateCard("VEHICLES COLLECTED", stats.vehicles_collected);
-      updateStatusCard("BOT CONNECTION", stats.bot_online ? "● Online" : "● Offline");
-      updateStatusCard("ACTIVE SERVERS", `${stats.active_servers} Discord server${stats.active_servers === 1 ? "" : "s"}`);
-      updateStatusCard("LAST WEBSITE UPDATE", new Date(stats.updated_at).toLocaleString());
+      showBotState(Boolean(stats.bot_online));
+      cardValue("ACTIVE SERVERS").textContent = `${stats.active_servers} Discord server${stats.active_servers === 1 ? "" : "s"}`;
+      cardValue("LAST WEBSITE UPDATE").textContent = new Date(stats.updated_at).toLocaleString();
     } catch {
-      // Existing text remains visible if the public status service is unavailable.
+      cardValue("BOT CONNECTION").textContent = "Status unavailable";
     }
   }
 
