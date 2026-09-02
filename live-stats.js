@@ -18,15 +18,15 @@
     const connection = cardValue("BOT CONNECTION");
     [overview, badge, service, connection].forEach((element) => element?.classList.toggle("is-down", !online));
 
-    title.textContent = online ? "Responder Royale is operational" : "The Discord bot is currently down";
-    copy.textContent = online
+    if (title) title.textContent = online ? "Responder Royale is operational" : "The Discord bot is currently down";
+    if (copy) copy.textContent = online
       ? "No service interruptions are currently reported."
       : previewOffline
         ? "Preview only — this is how the page looks during a bot outage."
         : "Commands and vehicle rounds may be unavailable while the team investigates.";
-    badge.textContent = online ? "All systems operational" : "Service interruption";
-    service.textContent = online ? "Operational" : "Down";
-    connection.textContent = online ? "● Online" : "● Offline";
+    if (badge) badge.textContent = online ? "All systems operational" : "Service interruption";
+    if (service) service.textContent = online ? "Operational" : "Down";
+    if (connection) connection.textContent = online ? "● Online" : "● Offline";
   };
 
   async function loadStats() {
@@ -38,10 +38,17 @@
       const [stats] = await response.json();
       if (!stats) throw new Error("No stats yet");
       showBotState(previewOffline ? false : Boolean(stats.bot_online));
-      cardValue("ACTIVE SERVERS").textContent = `${stats.active_servers} Discord server${stats.active_servers === 1 ? "" : "s"}`;
-      cardValue("LAST WEBSITE UPDATE").textContent = new Date(stats.updated_at).toLocaleString();
+      const activeServers = cardValue("ACTIVE SERVERS");
+      const registeredPlayers = cardValue("REGISTERED PLAYERS");
+      const vehiclesCollected = cardValue("VEHICLES COLLECTED");
+      const lastUpdate = cardValue("LAST WEBSITE UPDATE");
+      if (activeServers) activeServers.textContent = `${stats.active_servers} Discord server${stats.active_servers === 1 ? "" : "s"}`;
+      if (registeredPlayers) registeredPlayers.textContent = stats.registered_players;
+      if (vehiclesCollected) vehiclesCollected.textContent = stats.vehicles_collected;
+      if (lastUpdate) lastUpdate.textContent = new Date(stats.updated_at).toLocaleString();
     } catch {
-      cardValue("BOT CONNECTION").textContent = "Status unavailable";
+      const connection = cardValue("BOT CONNECTION");
+      if (connection) connection.textContent = "Status unavailable";
     }
   }
 
