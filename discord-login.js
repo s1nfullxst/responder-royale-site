@@ -25,7 +25,9 @@
   const sdk = document.createElement("script");
   sdk.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
   sdk.onload = () => {
-    const client = window.supabase.createClient(config.url, config.anonKey);
+    const client = window.RESPONDER_ROYALE_SUPABASE_CLIENT ||
+      window.supabase.createClient(config.url, config.anonKey);
+    window.RESPONDER_ROYALE_SUPABASE_CLIENT = client;
     const button = document.createElement("button");
     button.className = "rr-discord-login";
     button.type = "button";
@@ -66,17 +68,21 @@
         label.textContent = name;
         button.append(label);
         button.setAttribute("aria-label", `Logged in to Responder Royale as ${name}`);
+        button.title = "Reconnect Discord server access";
       } else {
         button.textContent = "Login with Discord";
         button.setAttribute("aria-label", "Login to Responder Royale with Discord");
+        button.title = "";
       }
       button.dataset.loggedIn = name ? "true" : "false";
     };
 
     button.addEventListener("click", async () => {
-      if (button.dataset.loggedIn === "true") return;
       button.disabled = true;
-      button.textContent = "Opening Discord…";
+      button.textContent = "Connecting Discord…";
+      if (button.dataset.loggedIn === "true") {
+        await client.auth.signOut({ scope: "local" });
+      }
       const { error } = await client.auth.signInWithOAuth({
         provider: "discord",
         options: {

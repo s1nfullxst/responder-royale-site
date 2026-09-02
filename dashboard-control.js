@@ -4,7 +4,10 @@
 
   const waitForSupabase = () => new Promise((resolve) => {
     const timer = setInterval(() => {
-      if (window.supabase) { clearInterval(timer); resolve(window.supabase); }
+      if (window.RESPONDER_ROYALE_SUPABASE_CLIENT) {
+        clearInterval(timer);
+        resolve(window.RESPONDER_ROYALE_SUPABASE_CLIENT);
+      }
     }, 100);
   });
 
@@ -17,8 +20,7 @@
   };
 
   (async () => {
-    const supabase = await waitForSupabase();
-    const client = supabase.createClient(config.url, config.anonKey);
+    const client = await waitForSupabase();
     const serverSelect = byId("server-select");
     const channelSelect = byId("game-channel");
     let selectedGuild = null;
