@@ -23,6 +23,7 @@
     const client = await waitForSupabase();
     const serverSelect = byId("server-select");
     const channelSelect = byId("game-channel");
+    const logChannelSelect = byId("log-channel");
     const spawnInterval = byId("spawn-interval");
     const customSpawnMinutes = byId("custom-spawn-minutes");
     let selectedGuild = null;
@@ -65,7 +66,9 @@
 
     async function loadChannels() {
       channelSelect.replaceChildren(new Option("Loading channels…", ""));
+      logChannelSelect.replaceChildren(new Option("Loading channels…", ""));
       channelSelect.disabled = true;
+      logChannelSelect.disabled = true;
       const { data, error } = await client
         .from("dashboard_channels")
         .select("channel_id, channel_name")
@@ -73,11 +76,17 @@
         .order("channel_name");
       if (error || !data?.length) {
         channelSelect.replaceChildren(new Option("Bot has not synced channels yet", ""));
+        logChannelSelect.replaceChildren(new Option("Bot has not synced channels yet", ""));
         return;
       }
       channelSelect.replaceChildren(new Option("Choose a game channel", ""));
-      data.forEach((channel) => channelSelect.add(new Option(`# ${channel.channel_name}`, channel.channel_id)));
+      logChannelSelect.replaceChildren(new Option("Choose a moderation log channel", ""));
+      data.forEach((channel) => {
+        channelSelect.add(new Option(`# ${channel.channel_name}`, channel.channel_id));
+        logChannelSelect.add(new Option(`# ${channel.channel_name}`, channel.channel_id));
+      });
       channelSelect.disabled = false;
+      logChannelSelect.disabled = false;
     }
 
     serverSelect.addEventListener("change", async () => {
@@ -128,7 +137,11 @@
           channel_id: channelSelect.value,
           spawn_minutes: spawnMinutes,
           auto_secrets: byId("auto-secrets").checked,
-          moderation_enabled: byId("moderation-tools").checked
+          moderation_enabled: byId("moderation-tools").checked,
+          automod_enabled: byId("automod-enabled").checked,
+          block_invites: byId("block-invites").checked,
+          spam_limit: Number(byId("spam-limit").value),
+          log_channel_id: logChannelSelect.value || null
         });
         notice(result);
       } catch (error) { notice(error.message || "Could not save settings.", false); }
@@ -139,6 +152,16 @@
         const result = await queue("double_points", { rounds: Number(byId("double-rounds").value) });
         notice(result);
       } catch (error) { notice(error.message || "Could not start the event.", false); }
+    });
+
+    byId("start-rapid").addEventListener("click", async () => {
+      try {
+        const result = await queue("rapid_spawn", {
+          interval: Number(byId("rapid-interval").value),
+          duration: Number(byId("rapid-duration").value)
+        });
+        notice(result);
+      } catch (error) { notice(error.message || "Could not start Rapid Response.", false); }
     });
 
     byId("send-announcement").addEventListener("click", async () => {
