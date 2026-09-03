@@ -141,7 +141,9 @@
           automod_enabled: byId("automod-enabled").checked,
           block_invites: byId("block-invites").checked,
           spam_limit: Number(byId("spam-limit").value),
-          log_channel_id: logChannelSelect.value || null
+          log_channel_id: logChannelSelect.value || null,
+          tickets_enabled: byId("tickets-enabled").checked,
+          ticket_category: byId("ticket-category").value.trim() || "Support Tickets"
         });
         notice(result);
       } catch (error) { notice(error.message || "Could not save settings.", false); }
