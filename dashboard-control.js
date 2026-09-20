@@ -17,7 +17,18 @@
     element.textContent = message;
     element.style.color = good ? "#5fd7a1" : "#ee714e";
     element.style.display = "inline";
+    element.setAttribute("role", "status");
   };
+
+  document.querySelectorAll('.side a[href^="#"]').forEach((link) => {
+    link.addEventListener("click", () => {
+      document.querySelectorAll('.side a[href^="#"]').forEach((item) => item.classList.remove("active"));
+      link.classList.add("active");
+    });
+  });
+  byId("mobile-menu")?.addEventListener("change", (event) => {
+    document.querySelector(event.target.value)?.scrollIntoView({ behavior: "smooth" });
+  });
 
   (async () => {
     const client = await waitForSupabase();
@@ -92,7 +103,13 @@
     serverSelect.addEventListener("change", async () => {
       selectedGuild = guilds.find((guild) => guild.id === serverSelect.value) || null;
       byId("server-name").textContent = selectedGuild ? selectedGuild.name : "Your Discord server";
+      byId("step-server")?.classList.toggle("done", Boolean(selectedGuild));
+      byId("step-channel")?.classList.remove("done");
       if (selectedGuild) await loadChannels();
+    });
+
+    channelSelect.addEventListener("change", () => {
+      byId("step-channel")?.classList.toggle("done", Boolean(channelSelect.value));
     });
 
     const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -126,6 +143,8 @@
 
     byId("save").addEventListener("click", async () => {
       try {
+        byId("save").disabled = true;
+        byId("save").textContent = "Saving…";
         if (!channelSelect.value) throw new Error("Choose the game channel first.");
         const spawnMinutes = spawnInterval.value === "custom"
           ? Number(customSpawnMinutes.value)
@@ -147,6 +166,10 @@
         });
         notice(result);
       } catch (error) { notice(error.message || "Could not save settings.", false); }
+      finally {
+        byId("save").disabled = false;
+        byId("save").textContent = "Save server settings";
+      }
     });
 
     byId("start-double").addEventListener("click", async () => {
