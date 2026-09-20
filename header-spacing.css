@@ -1,0 +1,7 @@
+.header,.site-header,.top{gap:16px!important}
+.header nav,.site-header nav,.top nav{margin-left:auto!important;margin-right:22px!important}
+.header>.join,.site-header>.site-join,.top>.join{margin-left:0!important}
+.rr-add-bot,.rr-discord-login{flex:0 0 auto}
+@media(max-width:1050px){.header nav,.site-header nav,.top nav{gap:18px!important;margin-right:8px!important}}
+@media(max-width:880px){.header nav,.site-header nav,.top nav{display:none!important}.rr-add-bot{margin-left:auto!important}}
+@media(max-width:760px){.header,.site-header,.top{gap:10px!important}}

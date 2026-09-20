@@ -11,7 +11,7 @@
 
   const installStyle = document.createElement("style");
   installStyle.textContent = `
-    .rr-add-bot{display:inline-flex;align-items:center;justify-content:center;height:40px;border:1px solid #77b7df;color:#dfeaf0;border-radius:6px;padding:0 13px;font:700 13px Arial,sans-serif;white-space:nowrap;text-decoration:none}
+    .rr-add-bot{display:inline-flex;align-items:center;justify-content:center;height:46px;border:1px solid #62c7ff;color:#eef8ff;border-radius:13px;padding:0 17px;font:700 13px Arial,sans-serif;white-space:nowrap;text-decoration:none}
     .rr-add-bot:hover{background:#263640}.rr-add-bot:focus-visible{outline:3px solid #fff;outline-offset:3px}
     @media(max-width:940px){header.top nav{display:none!important}.top{gap:10px}.rr-add-bot{margin-left:auto}}
     @media(max-width:610px){header.top .join{display:none}.rr-add-bot{padding:0 10px;font-size:12px}}
@@ -36,7 +36,7 @@
 
     const style = document.createElement("style");
     style.textContent = `
-      .rr-discord-login{appearance:none;min-width:40px;height:40px;border:1px solid #77b7df;background:#77b7df;color:#171d25;border-radius:6px;padding:0 12px;font:700 13px Arial,sans-serif;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+      .rr-discord-login{appearance:none;min-width:46px;height:46px;border:1px solid #62c7ff;background:#77b7df;color:#101923;border-radius:13px;padding:0 15px;font:700 13px Arial,sans-serif;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:9px}
       .rr-discord-login:hover{filter:brightness(1.08)}
       .rr-discord-login:focus-visible{outline:3px solid #fff;outline-offset:3px}
       .rr-discord-login[disabled]{opacity:.65;cursor:wait}
