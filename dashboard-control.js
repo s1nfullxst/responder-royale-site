@@ -37,7 +37,29 @@
     const logChannelSelect = byId("log-channel");
     const spawnInterval = byId("spawn-interval");
     const customSpawnMinutes = byId("custom-spawn-minutes");
+    const serverList = byId("server-list");
+    let selectedServerAvatar = byId("selected-server-avatar");
     let selectedGuild = null;
+
+    const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "RR";
+    const iconUrl = (guild) => guild.icon
+      ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=96`
+      : "";
+
+    const setAvatar = (element, guild) => {
+      const url = guild ? iconUrl(guild) : "";
+      if (url) {
+        const image = document.createElement("img");
+        image.className = element.className;
+        image.id = element.id;
+        image.alt = "";
+        image.src = url;
+        element.replaceWith(image);
+        if (element === selectedServerAvatar) selectedServerAvatar = image;
+      } else {
+        element.textContent = guild ? initials(guild.name) : "RR";
+      }
+    };
 
     spawnInterval.addEventListener("change", () => {
       customSpawnMinutes.hidden = spawnInterval.value !== "custom";
@@ -75,6 +97,35 @@
     serverSelect.disabled = false;
     byId("server-help").textContent = guilds.length ? "Choose a server you own." : "No Discord servers owned by this account were found.";
 
+    serverList.replaceChildren();
+    if (!guilds.length) {
+      const empty = document.createElement("div");
+      empty.className = "server-empty";
+      empty.textContent = "No owned servers were found.";
+      serverList.append(empty);
+    }
+    guilds.forEach((guild) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "server-choice";
+      button.dataset.guildId = guild.id;
+      button.title = guild.name;
+      const avatar = document.createElement(iconUrl(guild) ? "img" : "span");
+      avatar.className = "server-avatar";
+      avatar.alt = "";
+      if (iconUrl(guild)) avatar.src = iconUrl(guild);
+      else avatar.textContent = initials(guild.name);
+      const name = document.createElement("span");
+      name.className = "server-choice-name";
+      name.textContent = guild.name;
+      button.append(avatar, name);
+      button.addEventListener("click", () => {
+        serverSelect.value = guild.id;
+        serverSelect.dispatchEvent(new Event("change"));
+      });
+      serverList.append(button);
+    });
+
     async function loadChannels() {
       channelSelect.replaceChildren(new Option("Loading channels…", ""));
       logChannelSelect.replaceChildren(new Option("Loading channels…", ""));
@@ -103,6 +154,8 @@
     serverSelect.addEventListener("change", async () => {
       selectedGuild = guilds.find((guild) => guild.id === serverSelect.value) || null;
       byId("server-name").textContent = selectedGuild ? selectedGuild.name : "Your Discord server";
+      document.querySelectorAll(".server-choice").forEach((button) => button.classList.toggle("active", button.dataset.guildId === serverSelect.value));
+      setAvatar(selectedServerAvatar, selectedGuild);
       byId("step-server")?.classList.toggle("done", Boolean(selectedGuild));
       byId("step-channel")?.classList.remove("done");
       if (selectedGuild) await loadChannels();
