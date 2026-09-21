@@ -158,6 +158,7 @@
       setAvatar(selectedServerAvatar, selectedGuild);
       byId("step-server")?.classList.toggle("done", Boolean(selectedGuild));
       byId("step-channel")?.classList.remove("done");
+      window.dispatchEvent(new CustomEvent("rr:server-selected", { detail: { guild: selectedGuild, client } }));
       if (selectedGuild) await loadChannels();
     });
 
@@ -191,7 +192,9 @@
         .single();
       if (error) throw error;
       notice("Waiting for the bot…");
-      return waitForAction(queued.id);
+      const result = await waitForAction(queued.id);
+      window.dispatchEvent(new CustomEvent("rr:dashboard-action", { detail: { guild: selectedGuild, client } }));
+      return result;
     }
 
     byId("save").addEventListener("click", async () => {
