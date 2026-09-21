@@ -21,17 +21,17 @@
     const query = el("vehicle-search").value.trim().toLowerCase(); const rarity = el("rarity-filter").value;
     const rows = state.vehicles.filter((item) => (!query || `${item.name} ${item.country} ${item.vehicle_type}`.toLowerCase().includes(query)) && (!rarity || String(item.rarity).toLowerCase() === rarity));
     const grid = el("vehicle-grid");
-    if (!rows.length) { grid.innerHTML = '<div class="empty"><b>No matching vehicles</b>Try another search or rarity.</div>'; return; }
+    if (!rows.length) { grid.innerHTML = state.vehicles.length ? '<div class="empty"><b>No matching vehicles</b>Try another search or rarity.</div>' : '<div class="empty"><b>The catalogue is ready</b>The bot has not published its first vehicle snapshot yet. Discord gameplay continues normally.</div>'; return; }
     grid.replaceChildren(...rows.map(vehicleCard));
   };
   const renderRanks = (id, rows, valueKey, suffix) => {
     const list = el(id); if (!rows?.length) { list.innerHTML = '<div class="empty"><b>Waiting for synced rankings</b>Use the leaderboard commands in Discord while web sync is being prepared.</div>'; return; }
-    list.replaceChildren(...rows.map((row, index) => { const item = document.createElement("div"); item.className = "rank"; const rank = document.createElement("i"); rank.textContent = index + 1; const name = document.createElement("b"); name.textContent = safe(row.display_name, "Discord player"); const score = document.createElement("span"); score.textContent = `${safe(row[valueKey], 0)} ${suffix}`; item.append(rank, name, score); return item; }));
+    list.replaceChildren(...rows.map((row, index) => { const item = document.createElement("div"); item.className = "rank"; const rank = document.createElement("i"); rank.textContent = index + 1; const name = document.createElement(row.public_id ? "a" : "b"); name.textContent = safe(row.display_name, "Discord player"); if (row.public_id) name.href = `profile.html?id=${encodeURIComponent(row.public_id)}`; const score = document.createElement("span"); score.textContent = `${safe(row[valueKey], 0)} ${suffix}`; item.append(rank, name, score); return item; }));
   };
   async function load() {
     if (!config?.url || !config?.anonKey) return;
     try { state.vehicles = await api("public_vehicles?select=name,country,vehicle_type,rarity,emoji&order=name&limit=300"); renderVehicles(); el("vehicle-count").textContent = state.vehicles.length; } catch { el("vehicle-grid").innerHTML = '<div class="empty"><b>The web gallery is ready for bot sync</b>Vehicles remain available in Discord. Once the bot publishes the public_vehicles view, they appear here automatically.</div>'; }
-    try { const rows = await api("public_leaderboard?select=display_name,points,streak,level&order=points.desc&limit=10"); renderRanks("points-list", rows, "points", "points"); renderRanks("streak-list", [...rows].sort((a,b)=>(b.streak||0)-(a.streak||0)), "streak", "streak"); el("player-count").textContent = rows.length ? "Live" : "—"; } catch { renderRanks("points-list", [], "points", "points"); renderRanks("streak-list", [], "streak", "streak"); }
+    try { const rows = await api("public_leaderboard?select=public_id,display_name,points,streak,level&order=points.desc&limit=10"); renderRanks("points-list", rows, "points", "points"); renderRanks("streak-list", [...rows].sort((a,b)=>(b.streak||0)-(a.streak||0)), "streak", "streak"); el("player-count").textContent = rows.length ? "Live" : "—"; } catch { renderRanks("points-list", [], "points", "points"); renderRanks("streak-list", [], "streak", "streak"); }
   }
   el("vehicle-search")?.addEventListener("input", renderVehicles); el("rarity-filter")?.addEventListener("change", renderVehicles); load();
 })();
