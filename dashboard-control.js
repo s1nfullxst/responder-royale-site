@@ -83,10 +83,12 @@
         headers: { Authorization: `Bearer ${session.provider_token}` }
       });
       if (!response.ok) throw new Error("Discord did not return your servers.");
-      // The bot verifies ownership again before applying any request. Keep the
-      // server list consistent so a Discord administrator is never shown
-      // controls that the bot must reject.
-      guilds = (await response.json()).filter((guild) => guild.owner);
+      // Show servers the user owns or can manage. The bot and database policies
+      // still verify every action before it is applied.
+      guilds = (await response.json()).filter((guild) => {
+        const permissions = BigInt(guild.permissions || "0");
+        return guild.owner || Boolean(permissions & 8n) || Boolean(permissions & 32n);
+      });
     } catch (error) {
       byId("server-help").textContent = "Please sign out and sign in again to allow server access.";
       return;
@@ -218,7 +220,13 @@
           spam_limit: Number(byId("spam-limit").value),
           log_channel_id: logChannelSelect.value || null,
           tickets_enabled: byId("tickets-enabled").checked,
-          ticket_category: byId("ticket-category").value.trim() || "Support Tickets"
+          ticket_category: byId("ticket-category").value.trim() || "Support Tickets",
+          ticket_title: byId("ticket-title")?.value.trim() || "Need help?",
+          ticket_button: byId("ticket-button")?.value.trim() || "Open a ticket",
+          ticket_welcome: byId("ticket-welcome")?.value.trim() || "",
+          ticket_transcripts: byId("ticket-transcripts")?.checked ?? true,
+          blocked_words: byId("blocked-words")?.value.split(/\r?\n/).map((word) => word.trim()).filter(Boolean).slice(0, 100) || [],
+          automod_action: byId("automod-action")?.value || "delete"
         });
         notice(result);
       } catch (error) { notice(error.message || "Could not save settings.", false); }
@@ -230,6 +238,7 @@
 
     byId("start-double").addEventListener("click", async () => {
       try {
+        if (window.rrConfirm && !(await window.rrConfirm("Start double points?", "This immediately changes scoring in the selected Discord server."))) return;
         const result = await queue("double_points", { rounds: Number(byId("double-rounds").value) });
         notice(result);
       } catch (error) { notice(error.message || "Could not start the event.", false); }
@@ -237,6 +246,7 @@
 
     byId("start-rapid").addEventListener("click", async () => {
       try {
+        if (window.rrConfirm && !(await window.rrConfirm("Start Rapid Response?", "This immediately changes the spawn rate in the selected Discord server."))) return;
         const result = await queue("rapid_spawn", {
           interval: Number(byId("rapid-interval").value),
           duration: Number(byId("rapid-duration").value)
@@ -249,6 +259,7 @@
       try {
         const message = byId("announcement").value.trim();
         if (!message) throw new Error("Write an announcement first.");
+        if (window.rrConfirm && !(await window.rrConfirm("Send this announcement?", "The bot will post this message publicly in the selected game channel."))) return;
         const result = await queue("announcement", { message });
         byId("announcement").value = "";
         notice(result);

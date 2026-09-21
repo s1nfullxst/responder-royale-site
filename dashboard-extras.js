@@ -5,6 +5,8 @@
     double_points: "Double-points event requested",
     rapid_spawn: "Rapid Response requested",
     announcement: "Announcement requested",
+    ticket_panel: "Ticket panel updated",
+    automod_rules: "Automod rules updated",
   };
 
   document.querySelectorAll("[data-scroll]").forEach((button) => {
