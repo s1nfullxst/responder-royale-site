@@ -2,7 +2,7 @@
   const config = window.RESPONDER_ROYALE_SUPABASE;
   const id = new URLSearchParams(location.search).get("id");
   const set = (name, value) => { const element = document.querySelector(`[data-profile="${name}"]`); if (element) element.textContent = value ?? "—"; };
-  const fail = (message) => { document.getElementById("profile-state").textContent = message; document.getElementById("profile-card").hidden = true; };
+  const fail = (message) => { set("name", "Player profile"); document.getElementById("profile-state").textContent = message; document.getElementById("profile-card").hidden = true; };
   async function load() {
     if (!id || !config?.url || !config?.anonKey) return fail("Choose a player from the public leaderboard.");
     try {
