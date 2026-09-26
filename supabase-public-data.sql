@@ -147,8 +147,8 @@ grant select on public.staff_reviewers to authenticated;
 insert into public.staff_reviewers (user_id, role)
 select id, 'owner'
 from auth.users
-where raw_user_meta_data->>'provider_id' = '1544042785479327845'
-   or raw_user_meta_data->>'sub' = '1544042785479327845'
+where raw_user_meta_data->>'provider_id' = '1199709751240577066'
+   or raw_user_meta_data->>'sub' = '1199709751240577066'
 on conflict (user_id) do update set role = excluded.role;
 
 create or replace function public.protect_tester_review_fields()
