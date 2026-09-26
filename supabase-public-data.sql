@@ -106,3 +106,70 @@ create index if not exists public_activity_created_idx on public.public_activity
 create index if not exists public_servers_featured_idx on public.public_servers (featured, member_count desc);
 create index if not exists tester_applications_status_idx on public.tester_applications (status, created_at desc);
 create index if not exists community_feedback_status_idx on public.community_feedback (status, created_at desc);
+
+-- Private staff review access. Staff membership is tied to the authenticated
+-- Supabase user, never to a value supplied by the browser.
+create table if not exists public.staff_reviewers (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  role text not null default 'reviewer' check (role in ('owner','admin','reviewer')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.tester_applications add column if not exists reviewed_at timestamptz;
+alter table public.tester_applications add column if not exists reviewed_by uuid references auth.users(id);
+alter table public.tester_applications add column if not exists notification_sent_at timestamptz;
+alter table public.staff_reviewers enable row level security;
+
+create or replace function public.is_staff(check_user uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$ select exists(select 1 from public.staff_reviewers where user_id = check_user); $$;
+
+revoke all on function public.is_staff(uuid) from public;
+grant execute on function public.is_staff(uuid) to authenticated;
+
+drop policy if exists "Staff read own reviewer record" on public.staff_reviewers;
+create policy "Staff read own reviewer record" on public.staff_reviewers
+  for select to authenticated using (auth.uid() = user_id);
+drop policy if exists "Staff read tester applications" on public.tester_applications;
+create policy "Staff read tester applications" on public.tester_applications
+  for select to authenticated using (public.is_staff(auth.uid()));
+drop policy if exists "Staff review tester applications" on public.tester_applications;
+create policy "Staff review tester applications" on public.tester_applications
+  for update to authenticated using (public.is_staff(auth.uid())) with check (public.is_staff(auth.uid()));
+
+grant select on public.staff_reviewers to authenticated;
+
+-- Register the bot owner as a reviewer after they have logged in with Discord.
+insert into public.staff_reviewers (user_id, role)
+select id, 'owner'
+from auth.users
+where raw_user_meta_data->>'provider_id' = '1544042785479327845'
+   or raw_user_meta_data->>'sub' = '1544042785479327845'
+on conflict (user_id) do update set role = excluded.role;
+
+create or replace function public.protect_tester_review_fields()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_staff(auth.uid()) then
+    new.status := case when tg_op = 'INSERT' then 'pending' else old.status end;
+    new.reviewed_at := case when tg_op = 'INSERT' then null else old.reviewed_at end;
+    new.reviewed_by := case when tg_op = 'INSERT' then null else old.reviewed_by end;
+    new.notification_sent_at := case when tg_op = 'INSERT' then null else old.notification_sent_at end;
+  end if;
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+drop trigger if exists protect_tester_review_fields on public.tester_applications;
+create trigger protect_tester_review_fields
+before insert or update on public.tester_applications
+for each row execute function public.protect_tester_review_fields();
