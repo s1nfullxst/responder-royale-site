@@ -9,3 +9,20 @@
 .mobile-toggle{display:none;border:1px solid rgba(119,183,223,.28);background:#122030;color:#fff;border-radius:10px;padding:9px 12px;font-weight:900}
 @media(max-width:900px){.hub-grid,.community-actions{grid-template-columns:1fr}.setup-flow{grid-template-columns:1fr 1fr}.mobile-toggle{display:block}.header nav{display:none;position:absolute;top:70px;left:20px;right:20px;padding:18px;border:1px solid var(--line);border-radius:16px;background:#101c29;box-shadow:0 18px 50px rgba(0,0,0,.45)}.header nav.open{display:grid;gap:16px}.header{position:relative}}
 @media(max-width:560px){.hub-head{display:block}.setup-flow{grid-template-columns:1fr}.community-hub{padding:75px 0}.hub-panel{padding:20px}}
+
+/* Official tester application */
+.apply{max-width:920px;margin:64px auto 110px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.apply .tag{letter-spacing:1.7px}.apply-intro{max-width:760px}
+.apply-card{position:relative;padding:34px;border-color:rgba(119,183,223,.2);border-radius:22px;background:linear-gradient(145deg,rgba(27,44,62,.97),rgba(17,29,42,.99));box-shadow:0 25px 70px rgba(0,0,0,.22);overflow:hidden}
+.apply-card:before{content:"TESTER APPLICATION";display:block;margin:0 0 26px;padding-bottom:16px;border-bottom:1px solid rgba(119,183,223,.16);color:#77b7df;font-size:11px;font-weight:900;letter-spacing:1.8px}
+.apply .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 18px}
+.apply .field{gap:9px;min-width:0}.apply .field label{color:#eef6fc;font-size:13px;font-weight:750}
+.apply .field input,.apply .field select,.apply .field textarea{box-sizing:border-box;padding:14px 16px;border-color:rgba(119,183,223,.28);border-radius:13px;background:#101b27;color:#f5f9fc;font:500 15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;outline:none;transition:border-color .18s,box-shadow .18s,background .18s}
+.apply .field select{appearance:none;-webkit-appearance:none;padding-right:48px;border-radius:16px;background-color:#101b27;background-image:linear-gradient(45deg,transparent 50%,#9fcbe7 50%),linear-gradient(135deg,#9fcbe7 50%,transparent 50%);background-position:calc(100% - 21px) 50%,calc(100% - 15px) 50%;background-size:6px 6px,6px 6px;background-repeat:no-repeat;cursor:pointer}
+.apply .field select:hover{border-color:rgba(119,183,223,.52);background-color:#132334}
+.apply .field input:focus,.apply .field select:focus,.apply .field textarea:focus{border-color:#77b7df;background:#122131;box-shadow:0 0 0 4px rgba(119,183,223,.12)}
+.apply .field input::placeholder,.apply .field textarea::placeholder{color:#72869a}.apply .field textarea{min-height:108px}
+.apply .agree{display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid rgba(119,183,223,.16);border-radius:13px;background:rgba(9,20,31,.5);color:#aebdcc;font-size:12px;font-weight:600;line-height:1.55}
+.apply .agree input{flex:0 0 18px;width:18px;height:18px;margin:1px 0 0;padding:0;accent-color:#ee714e}
+.apply .apply-status{min-height:20px;margin:14px 0 0}.apply #apply-button{width:auto;min-width:230px;padding:14px 22px}
+@media(max-width:700px){.apply{margin-top:40px;padding:0 16px}.apply .form-grid{grid-template-columns:1fr}.apply-card{padding:23px}.apply #apply-button{width:100%}}
