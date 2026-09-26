@@ -16,8 +16,8 @@
     const element = byId("notice");
     element.textContent = message;
     element.style.color = good ? "#5fd7a1" : "#ee714e";
-    element.style.display = "inline";
-    element.setAttribute("role", "status");
+    element.classList.toggle("rr-error", !good); element.classList.remove("rr-show"); requestAnimationFrame(() => element.classList.add("rr-show")); clearTimeout(notice.timer); notice.timer = setTimeout(() => element.classList.remove("rr-show"), good ? 4500 : 8000);
+    element.setAttribute("role", "status"); element.setAttribute("aria-live", good ? "polite" : "assertive");
   };
 
   document.querySelectorAll('.side a[href^="#"]').forEach((link) => {
